@@ -2,7 +2,7 @@ sudo: required
 services:
   - docker
 
-before_all:
+before_install:
   - docker build -t kromsik/react-test -f ./client/Dockerfile ./client
 
 script:
