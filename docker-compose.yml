@@ -1,0 +1,43 @@
+version: '3'
+services:
+  nginx:
+    restart: always
+    build:
+      dockerfile: Dockerfile.dev
+      context: ./nginx
+    ports:
+     - "3050:80"
+  postgres-db: #name it as you want
+    image: 'postgres:latest' # name matters - pulled from DOCKER-HUB
+  redis-db: #name it as you want
+    image: 'redis:latest'
+  api-node: #name it as you want
+    build:
+      dockerfile: Dockerfile.dev
+      context: ./server
+    volumes:
+      - /app/node_modules # exclude node_modules from touching inside Container
+      - ./server:/app # copy from ./server on local machine to ./app in container
+    environment: # pass global variables to runtime
+      - REDIS_HOST=redis-db # name matters! should be same as above line 5
+      - REDIS_PORT=6379
+      - PGUSER=postgres
+      - PGHOST=postgres-db # name matters! should be same as above
+      - PGDATABASE=postgres
+      - PGPASSWORD=postrges_password
+      - PGPORT=5432
+  client-react: #name it as you want
+    build:
+      dockerfile: Dockerfile.dev
+      context: ./client
+    volumes:
+      - /app/node_modules
+      - ./client:/app
+  worker: #name it as you want
+    build:
+      dockerfile: Dockerfile.dev
+      context: ./worker
+    volumes:
+      - /app/node_modules
+      - ./worker:/app
+
