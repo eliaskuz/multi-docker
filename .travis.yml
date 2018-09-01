@@ -1,0 +1,22 @@
+sudo: required
+services:
+  - docker
+
+before_all:
+  - docker build -t kromsik/react-test -f ./client/Dockerfile ./client
+
+script:
+  - docker run kromsik/react-test npm test -- --coverage
+
+after_success:
+  - docker build -t kromsik/multi-client ./client
+  - docker build -t kromsik/multi-nginx ./nginx
+  - docker build -t kromsik/multi-server ./server
+  - docker build -t kromsik/multi-worker ./worker
+  # Log in to the docker CLI - very strange script!!!
+  - echo "#DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
+  # Take those images and push them to docker hub
+  - docker push kromsik/multi-client
+  - docker push kromsik/multi-nginx
+  - docker push kromsik/multi-server
+  - docker push kromsik/multi-worker
